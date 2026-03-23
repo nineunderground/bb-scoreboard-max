@@ -5,10 +5,10 @@ Blood Bowl scoreboard running on ESP32-S3 with a **TFT touchscreen** — no exte
 ## Hardware
 
 - **ESP32-S3 DevKitC-1 v1.1**
-- **2.8" ILI9341 TFT display** (320×240, SPI) with **XPT2046 resistive touch**
+- **4.0" ST7796S TFT display** (480×320, SPI) with **XPT2046 resistive touch**
 - Optional: small speaker (30Ω) through a 100Ω resistor for sound effects
 
-These 2.8" TFT+touch combo modules are widely available on AliExpress/Amazon for ~€5-8. Common labels: "2.8 inch SPI TFT ILI9341 with touch" or "2.8 inch TFT LCD Shield".
+This project targets a 4.0" SPI TFT module based on the ST7796S controller, with optional XPT2046 resistive touch. Typical seller labels are "4.0 inch SPI TFT ST7796S" or similar variants mentioning 480x320 resolution.
 
 ## TFT + Touch Pinout
 
@@ -188,6 +188,8 @@ Upload both to the ESP32-S3 alongside `main.py`.
 ### 2. Flash MicroPython firmware
 
 Download from: https://micropython.org/download/ESP32_GENERIC_S3/
+
+wget https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20251209-v1.27.0.bin -o ESP32_GENERIC_S3-20251209-v1.27.0.bin
 
 Check serial port with:
 Get-WmiObject Win32_PnPEntity | Where-Object { $_.Name -like "*SERIAL*" } | Select-Object Name
