@@ -10,6 +10,34 @@ Blood Bowl scoreboard running on ESP32-S3 with a **TFT touchscreen** — no exte
 
 These 2.8" TFT+touch combo modules are widely available on AliExpress/Amazon for ~€5-8. Common labels: "2.8 inch SPI TFT ILI9341 with touch" or "2.8 inch TFT LCD Shield".
 
+## TFT + Touch Pinout
+
+Module connector pinout:
+
+    Number  Pin Label    Description
+    ------  ---------    -----------------------------------------------------
+    1       VCC          5V/3.3V power input
+    2       GND          Ground
+    3       CS           LCD chip select, active low
+    4       RESET        LCD reset, active low
+    5       DC/RS        LCD command/data selection
+    6       SDI(MOSI)    LCD SPI write data
+    7       SCK          LCD SPI clock
+    8       LED          Backlight control, active high
+    9       SDO(MISO)    LCD SPI read data, optional if reads are unused
+    10      T_CLK        Touch SPI clock
+    11      T_CS         Touch chip select, active low
+    12      T_DIN        Touch SPI input
+    13      T_DO         Touch SPI output
+    14      T_IRQ        Touch interrupt, low when touched
+
+Notes:
+
+- `T_CLK`, `T_DIN`, and `T_DO` are normally shared with the LCD SPI bus clock/data lines.
+- If you do not need touch, you can leave the touch pins disconnected.
+- If you do not control backlight brightness in software, tie `LED` to `3V3` for always-on backlight.
+- In this project, `T_IRQ` is not used.
+
 ## Project layout
 
     bb-scoreboard-max/
@@ -43,6 +71,42 @@ The TFT and touch controller share the same SPI bus (SPI2/HSPI) with separate CS
     T_DIN             (shared MOSI)   SPI data in (same bus)
     T_DO              (shared MISO)   SPI data out (same bus)
     T_IRQ             not connected   Touch interrupt (optional)
+
+Step-by-step wiring:
+
+1. Connect `VCC` on the display to ESP32-S3 `3V3`.
+2. Connect `GND` on the display to ESP32-S3 `GND`.
+3. Connect `CS` to `GPIO10`.
+4. Connect `RESET` to `GPIO8`.
+5. Connect `DC/RS` to `GPIO9`.
+6. Connect `SDI(MOSI)` to `GPIO11`.
+7. Connect `SCK` to `GPIO12`.
+8. Connect `LED` to `GPIO14` if you want software backlight control. If not, connect `LED` directly to `3V3`.
+9. Connect `SDO(MISO)` to `GPIO13`.
+10. Connect `T_CLK` to the same ESP32-S3 pin as `SCK`, which is `GPIO12`.
+11. Connect `T_CS` to `GPIO7`.
+12. Connect `T_DIN` to the same ESP32-S3 pin as `SDI(MOSI)`, which is `GPIO11`.
+13. Connect `T_DO` to the same ESP32-S3 pin as `SDO(MISO)`, which is `GPIO13`.
+14. Leave `T_IRQ` disconnected, because `main.py` does not use it.
+
+Quick wiring summary:
+
+    Display pin   ESP32-S3 pin
+    -----------   ------------
+    VCC           3V3
+    GND           GND
+    CS            GPIO10
+    RESET         GPIO8
+    DC/RS         GPIO9
+    SDI(MOSI)     GPIO11
+    SCK           GPIO12
+    LED           GPIO14 or 3V3
+    SDO(MISO)     GPIO13
+    T_CLK         GPIO12
+    T_CS          GPIO7
+    T_DIN         GPIO11
+    T_DO          GPIO13
+    T_IRQ         not connected
 
 ### Speaker (optional)
 
@@ -124,6 +188,9 @@ Upload both to the ESP32-S3 alongside `main.py`.
 ### 2. Flash MicroPython firmware
 
 Download from: https://micropython.org/download/ESP32_GENERIC_S3/
+
+Check serial port with:
+Get-WmiObject Win32_PnPEntity | Where-Object { $_.Name -like "*SERIAL*" } | Select-Object Name
 
     python -m esptool --chip esp32s3 --port COM6 erase-flash
     python -m esptool --chip esp32s3 --port COM6 --baud 460800 write-flash -z 0 ESP32_GENERIC_S3-20251209-v1.27.0.bin
