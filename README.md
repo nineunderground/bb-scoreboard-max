@@ -192,26 +192,26 @@ Download from: https://micropython.org/download/ESP32_GENERIC_S3/
 Check serial port with:
 Get-WmiObject Win32_PnPEntity | Where-Object { $_.Name -like "*SERIAL*" } | Select-Object Name
 
-    python -m esptool --chip esp32s3 --port COM6 erase-flash
-    python -m esptool --chip esp32s3 --port COM6 --baud 460800 write-flash -z 0 ESP32_GENERIC_S3-20251209-v1.27.0.bin
+    python -m esptool --chip esp32s3 --port COM4 erase-flash
+    python -m esptool --chip esp32s3 --port COM4 --baud 460800 write-flash -z 0 ESP32_GENERIC_S3-20251209-v1.27.0.bin
 
 ### 3. Upload files to the board
 
-    mpremote connect COM6 sleep 1 fs cp .\ili9341.py :ili9341.py
-    mpremote connect COM6 sleep 1 fs cp .\xpt2046.py :xpt2046.py
-    mpremote connect COM6 sleep 1 fs cp .\main.py :main.py
+    mpremote connect COM4 sleep 1 fs cp .\ili9341.py :ili9341.py
+    mpremote connect COM4 sleep 1 fs cp .\xpt2046.py :xpt2046.py
+    mpremote connect COM4 sleep 1 fs cp .\main.py :main.py
 
 ### 4. Reset and test
 
-    mpremote connect COM6 reset
-    mpremote connect COM6 repl
+    mpremote connect COM4 reset
+    mpremote connect COM4 repl
 
 You should see the startup screen, then the scoreboard.
 
 ### 5. Iterate
 
-    mpremote connect COM6 sleep 1 fs cp .\main.py :main.py
-    mpremote connect COM6 reset
+    mpremote connect COM4 sleep 1 fs cp .\main.py :main.py
+    mpremote connect COM4 reset
 
 ## Sound effects
 
