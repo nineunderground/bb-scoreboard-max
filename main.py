@@ -29,9 +29,6 @@ TFT_BL   = 14  # backlight (optional, some modules have no BL pin)
 # Touch controller (directly on HSPI / SPI2, directly on the same bus)
 TOUCH_CS = 7
 
-# Speaker (optional — wire through 100 Ohm resistor)
-SPEAKER_PIN = 15
-
 # ---------------------------------------------------------------------------
 # Display and touch setup
 # ---------------------------------------------------------------------------
@@ -55,12 +52,6 @@ try:
     bl = PWM(Pin(TFT_BL), freq=1000, duty=1023)
 except Exception:
     bl = None
-
-# Optional speaker
-try:
-    speaker = PWM(Pin(SPEAKER_PIN), freq=440, duty=0)
-except Exception:
-    speaker = None
 
 # ---------------------------------------------------------------------------
 # Colors (RGB565)
@@ -131,42 +122,6 @@ ZONE_HOME_HEADER = (0, 0, DIVIDER_X, HEADER_H)
 ZONE_AWAY_HEADER = (DIVIDER_X, 0, 320, HEADER_H)
 ZONE_TURN        = (0, TURN_Y, 320, BOTTOM_Y)
 ZONE_RESET       = (0, BOTTOM_Y, 320, 240)
-
-# ---------------------------------------------------------------------------
-# Sound effects
-# ---------------------------------------------------------------------------
-def beep(freq=880, duration_ms=80):
-    if speaker is None:
-        return
-    speaker.freq(freq)
-    speaker.duty(512)
-    sleep(duration_ms / 1000)
-    speaker.duty(0)
-
-
-def beep_touchdown():
-    if speaker is None:
-        return
-    melody = [(523, 80), (659, 80), (784, 80), (1047, 200)]
-    for freq, dur in melody:
-        speaker.freq(freq)
-        speaker.duty(512)
-        sleep(dur / 1000)
-        speaker.duty(0)
-        sleep(0.02)
-
-
-def beep_turn():
-    beep(660, 60)
-    sleep(0.04)
-    beep(880, 60)
-
-
-def beep_reset():
-    for f in [600, 400, 300]:
-        beep(f, 100)
-        sleep(0.03)
-
 
 # ---------------------------------------------------------------------------
 # Drawing helpers
@@ -291,25 +246,21 @@ def handle_touch(tx, ty):
     # Home score area — increase home score
     if point_in_zone(tx, ty, ZONE_HOME_SCORE):
         home_score = (home_score + 1) % 100
-        beep_touchdown()
         return True
 
     # Away score area — increase away score
     if point_in_zone(tx, ty, ZONE_AWAY_SCORE):
         away_score = (away_score + 1) % 100
-        beep_touchdown()
         return True
 
     # Home header — set active team to home
     if point_in_zone(tx, ty, ZONE_HOME_HEADER):
         active_team = "HOME"
-        beep(660, 40)
         return True
 
     # Away header — set active team to away
     if point_in_zone(tx, ty, ZONE_AWAY_HEADER):
         active_team = "AWAY"
-        beep(660, 40)
         return True
 
     # Turn track — advance turn
@@ -321,7 +272,6 @@ def handle_touch(tx, ty):
             current_turn += 1
             if current_turn > TURN_MAX:
                 current_turn = TURN_MIN
-        beep_turn()
         return True
 
     # Reset bar
@@ -330,7 +280,6 @@ def handle_touch(tx, ty):
         away_score = 0
         current_turn = 1
         active_team = "HOME"
-        beep_reset()
         return True
 
     return False

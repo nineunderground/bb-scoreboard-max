@@ -6,7 +6,6 @@ Blood Bowl scoreboard running on ESP32-S3 with a **TFT touchscreen** — no exte
 
 - **ESP32-S3 DevKitC-1 v1.1**
 - **4.0" ST7796S TFT display** (480×320, SPI) with **XPT2046 resistive touch**
-- Optional: small speaker (30Ω) through a 100Ω resistor for sound effects
 
 This project targets a 4.0" SPI TFT module based on the ST7796S controller, with optional XPT2046 resistive touch. Typical seller labels are "4.0 inch SPI TFT ST7796S" or similar variants mentioning 480x320 resolution.
 
@@ -108,11 +107,6 @@ Quick wiring summary:
     T_DO          GPIO13
     T_IRQ         not connected
 
-### Speaker (optional)
-
-    Speaker red  → 100Ω resistor → GPIO15
-    Speaker black → GND
-
 ASCII wiring diagram:
 
     TFT+Touch Module                     ESP32-S3 DevKit
@@ -130,12 +124,6 @@ ASCII wiring diagram:
     [ T_CLK   ] ---- (shared with SCK)
     [ T_DIN   ] ---- (shared with SDI)
     [ T_DO    ] ---- (shared with SDO)
-
-    Speaker                              ESP32-S3 DevKit
-    -------                              ----------------
-    [ + red  ] --[ 100Ω ]----------------> [ GPIO15 ]
-    [ - blk  ] --------------------------> [ GND    ]
-
 ## Screen Layout (320×240 landscape)
 
     ┌──────────────────┬──────────────────┐  0
@@ -192,8 +180,8 @@ Download from: https://micropython.org/download/ESP32_GENERIC_S3/
 wget https://micropython.org/resources/firmware/ESP32_GENERIC_S3-20251209-v1.27.0.bin -o ESP32_GENERIC_S3-20251209-v1.27.0.bin
 
 Check serial port with:
-Get-WmiObject Win32_PnPEntity | Where-Object { $_.Name -like "*SERIAL*" } | Select-Object Name
 
+    Get-WmiObject Win32_PnPEntity | Where-Object { $_.Name -like "*SERIAL*" } | Select-Object Name
     python -m esptool --chip esp32s3 --port COM4 erase-flash
     python -m esptool --chip esp32s3 --port COM4 --baud 460800 write-flash -z 0 ESP32_GENERIC_S3-20251209-v1.27.0.bin
 
@@ -215,16 +203,6 @@ You should see the startup screen, then the scoreboard.
     mpremote connect COM4 sleep 1 fs cp .\main.py :main.py
     mpremote connect COM4 reset
 
-## Sound effects
-
-If a speaker is wired to GPIO15:
-- **Touchdown** — ascending 4-note fanfare when score increases
-- **Turn change** — double beep
-- **Team switch** — single short beep
-- **Reset** — descending 3-note tone
-
-No speaker? Everything works silently.
-
 ## Differences from bb-scoreboard
 
 | Feature | bb-scoreboard | bb-scoreboard-max |
@@ -234,7 +212,6 @@ No speaker? Everything works silently.
 | Score display | Single digit (0-9) | Two digits (0-99) |
 | Team indicator | Traffic light LEDs | On-screen highlight |
 | Color | Monochrome | Full color (65K) |
-| Sound | None | Optional speaker |
 | Modules needed | OLED + button + LED | Just the TFT |
 
 ## Notes
