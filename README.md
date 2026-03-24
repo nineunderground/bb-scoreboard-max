@@ -195,19 +195,27 @@ Open the official page from PowerShell:
 
     Start-Process "https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers"
 
-After downloading and extracting the Windows driver package, install the INF from an elevated PowerShell session:
+Or download and extract directly from PowerShell:
 
-    cd $env:USERPROFILE\Downloads
-    Get-ChildItem -Recurse -Filter silabser.inf
-    pnputil /add-driver .\CP210x_Universal_Windows_Driver\silabser.inf /install
+    wget https://www.silabs.com/documents/public/software/CP210x_Universal_Windows_Driver.zip -OutFile "./CP210x_Universal_Windows_Driver.zip"
+
+    Expand-Archive ".\CP210x_Universal_Windows_Driver.zip" -DestinationPath ".\CP210x_Universal_Windows_Driver"
+
+    rm .\CP210x_Universal_Windows_Driver.zip
+
+Then install the INF from an elevated PowerShell session:
+
+    pnputil /add-driver "$env:USERPROFILE\Downloads\CP210x_Universal_Windows_Driver\silabser.inf" /install
 
 If the extracted folder name differs, use the path returned by `Get-ChildItem`.
 
 Unplug and reconnect the board, then confirm the COM port:
 
-    Get-CimInstance Win32_PnPEntity |
-      Where-Object { $_.Name -match "CP210|COM[0-9]+" } |
-      Select-Object Name
+    Get-CimInstance Win32_PnPEntity | Where-Object { $_.Name -match "CP210" } | Select-Object Name, Status
+
+Set the port as a variable for the commands below:
+
+    $PORT = "COM3"  # replace with your actual port number
 
 ### 3. Flash MicroPython firmware for classic ESP32
 
@@ -219,26 +227,26 @@ As of 2026-03-23, the latest stable `ESP32_GENERIC` release on that page is `v1.
 
 Example flashing commands:
 
-    python -m esptool --chip esp32 --port COMx erase-flash
-    python -m esptool --chip esp32 --port COMx --baud 460800 write-flash -z 0 ESP32_GENERIC-v1.27.0.bin
+    python -m esptool --chip esp32 --port $PORT erase-flash
+    python -m esptool --chip esp32 --port $PORT --baud 460800 write-flash -z 0 ESP32_GENERIC-v1.27.0.bin
 
 If flashing fails, hold `BOOT`, tap `EN` or `RESET`, release `BOOT`, and retry.
 
 ### 4. Upload files to the board
 
-    mpremote connect COMx sleep 1 fs cp .\ili9341.py :ili9341.py
-    mpremote connect COMx sleep 1 fs cp .\xpt2046.py :xpt2046.py
-    mpremote connect COMx sleep 1 fs cp .\main.py :main.py
+    mpremote connect $PORT sleep 1 fs cp .\ili9341.py :ili9341.py
+    mpremote connect $PORT sleep 1 fs cp .\xpt2046.py :xpt2046.py
+    mpremote connect $PORT sleep 1 fs cp .\main.py :main.py
 
 ### 5. Reset and test
 
-    mpremote connect COMx reset
-    mpremote connect COMx repl
+    mpremote connect $PORT reset
+    mpremote connect $PORT repl
 
 ### 6. Iterate
 
-    mpremote connect COMx sleep 1 fs cp .\main.py :main.py
-    mpremote connect COMx reset
+    mpremote connect $PORT sleep 1 fs cp .\main.py :main.py
+    mpremote connect $PORT reset
 
 ## Differences from bb-scoreboard
 
